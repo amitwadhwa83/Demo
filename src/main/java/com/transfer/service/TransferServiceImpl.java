@@ -1,11 +1,13 @@
 package com.transfer.service;
 
-import static com.transfer.util.TransferUtil.validate;
+import static com.transfer.util.TransferUtil.validateTransfer;
 
 import java.math.BigDecimal;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +15,17 @@ import com.transfer.domain.Account;
 import com.transfer.domain.Transfer;
 import com.transfer.repository.TransferRepository;
 
-@Service("employeeService")
+/**
+ * Service class for Transfer operations
+ * 
+ * @author amit wadhwa
+ *
+ */
+@Service("transferService")
 @Transactional(rollbackOn = Exception.class)
 public class TransferServiceImpl implements TransferService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransferServiceImpl.class);
 
     @Autowired
     private TransferRepository transferRepository;
@@ -36,16 +46,19 @@ public class TransferServiceImpl implements TransferService {
     @Override
     public long doTransfer(String sourceAccountName, String destAccountName, BigDecimal amount) {
 
-	// Validate values
-	validate(amount, sourceAccountName, destAccountName);
+	LOGGER.info("Initiating the transfer for amount {} from account {} to account {}", amount, sourceAccountName,
+		destAccountName);
 
-	// Transfer
+	// Validate values
+	validateTransfer(amount, sourceAccountName, destAccountName);
+
+	// Do transfer
 	Account source = accountService.findOne(sourceAccountName);
 	Account destination = accountService.findOne(destAccountName);
-	source.getBalance().subtract(amount);
-	destination.getBalance().add(amount);
+	source.setBalance(source.getBalance().subtract(amount));
+	destination.setBalance(destination.getBalance().add(amount));
 
-	// Update transaction
+	// Record transaction
 	return transferRepository.save(new Transfer(sourceAccountName, destAccountName, amount)).getId();
     }
 }
