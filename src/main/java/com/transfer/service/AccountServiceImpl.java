@@ -41,7 +41,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean exists(String name) {
 	checkEmpty(name);
-	return !isEmpty(findOne(name).getName()) ? true : false;
+	return accountRepository.existsById(name);
+	// !isEmpty(findOne(name).getName()) ? true : false;
     }
 
     @Override
@@ -57,14 +58,7 @@ public class AccountServiceImpl implements AccountService {
 	return accountRepository.findAll();
     }
 
-    @Override
-    public void save(Account... accounts) {
-	for (Account account : accounts) {
-	    accountRepository.save(account);
-	}
-    }
-
-    public static void checkEmpty(String value) {
+    private static void checkEmpty(String value) {
 	if (isEmpty(value)) {
 	    raiseException("Invalid input", value);
 	}

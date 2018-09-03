@@ -12,6 +12,4 @@ public interface AccountService {
     boolean exists(String name);
 
     void createAccount(String name, BigDecimal balance);
-
-    void save(Account... accounts);
 }
