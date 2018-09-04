@@ -42,7 +42,6 @@ public class AccountServiceImpl implements AccountService {
     public boolean exists(String name) {
 	checkEmpty(name);
 	return accountRepository.existsById(name);
-	// !isEmpty(findOne(name).getName()) ? true : false;
     }
 
     @Override

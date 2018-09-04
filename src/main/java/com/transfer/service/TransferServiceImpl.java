@@ -50,7 +50,7 @@ public class TransferServiceImpl implements TransferService {
 		destAccountName);
 
 	// Validate values
-	validateTransfer(amount, sourceAccountName, destAccountName);
+	validateTransfer(accountService, amount, sourceAccountName, destAccountName);
 
 	// Do transfer
 	Account source = accountService.findOne(sourceAccountName);

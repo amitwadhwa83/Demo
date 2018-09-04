@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.transfer.domain.Account;
@@ -38,22 +37,20 @@ public class AccountServiceImplTest {
     AccountRepository accountRepository;
 
     @Captor
-    ArgumentCaptor<Account> accountArgument;
+    ArgumentCaptor<Account> accountArgCaptor;
 
     Random random = new Random();
-
     private static final Account EMPTY_ACCOUNT = new Account();
     private static final String EMPTY_ACCOUNT_NAME = "";
 
     @Test(expected = RuntimeException.class)
-    public final void testFindOneValidationFailsforCheckEmpty() {
+    public final void testFindOneFailsforValidationCheckEmpty() {
 	// GIVEN
 
 	// WHEN
 	service.findOne(EMPTY_ACCOUNT_NAME);
 
 	// THEN
-	// Expected invocations
 	// Expected exception
     }
 
@@ -71,13 +68,9 @@ public class AccountServiceImplTest {
 	verify(accountRepository, times(1)).findById(eq(accountName));
 	// Assertions
 	assertThat(EMPTY_ACCOUNT, is(equalTo(response)));
-
-	// verify(accountRepository).findById(argument.capture());
-	// assertThat(input, is(equalTo(argument.getValue())));
     }
 
     @Test
-    @Repeat(value = 10)
     public final void testFindOneReturnsExpectedAccount() {
 	// GIVEN
 	String accountName = randomAlphanumeric(10);
@@ -95,14 +88,13 @@ public class AccountServiceImplTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public final void testExistsValidationFailsforCheckEmpty() {
+    public final void testExistsFailsforValidationCheckEmpty() {
 	// GIVEN
 
 	// WHEN
 	service.exists(EMPTY_ACCOUNT_NAME);
 
 	// THEN
-	// Expected invocations
 	// Expected exception
     }
 
@@ -139,19 +131,18 @@ public class AccountServiceImplTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public final void testCreateAccountValidationFailedForName() {
+    public final void testCreateAccountFailsForValidationName() {
 	// GIVEN
 
 	// WHEN
 	service.createAccount(EMPTY_ACCOUNT_NAME, anAmount());
 
 	// THEN
-	// Expected invocations
 	// Expected exception
     }
 
     @Test(expected = RuntimeException.class)
-    public final void testCreateAccountValidationFailedForNullAmount() {
+    public final void testCreateAccountFailsForValidationNullAmount() {
 	// GIVEN
 	String accountName = randomAlphanumeric(10);
 
@@ -159,12 +150,11 @@ public class AccountServiceImplTest {
 	service.createAccount(accountName, null);
 
 	// THEN
-	// Expected invocations
 	// Expected exception
     }
 
     @Test(expected = RuntimeException.class)
-    public final void testCreateAccountValidationFailedForNegativeAmount() {
+    public final void testCreateAccountFailsForValidationNegativeAmount() {
 	// GIVEN
 	String accountName = randomAlphanumeric(10);
 
@@ -172,12 +162,10 @@ public class AccountServiceImplTest {
 	service.createAccount(accountName, anAmount().negate());
 
 	// THEN
-	// Expected invocations
 	// Expected exception
     }
 
     @Test
-    @Repeat(value = 10)
     public final void testCreateAccountSavesAnAccount() {
 	// GIVEN
 	String accountName = randomAlphanumeric(10);
@@ -189,15 +177,14 @@ public class AccountServiceImplTest {
 	// THEN
 	// Expected invocations
 	verify(accountRepository, times(1)).save(any(Account.class));
-	verify(accountRepository).save(accountArgument.capture());
+	verify(accountRepository).save(accountArgCaptor.capture());
 
 	// Assertions
-	assertThat(accountName, is(equalTo(accountArgument.getAllValues().get(0).getName())));
-	assertThat(amount, is(equalTo(accountArgument.getAllValues().get(0).getBalance())));
+	assertThat(accountName, is(equalTo(accountArgCaptor.getAllValues().get(0).getName())));
+	assertThat(amount, is(equalTo(accountArgCaptor.getAllValues().get(0).getBalance())));
     }
 
     @Test
-    @Repeat(value = 10)
     public final void testFindAll() {
 	// GIVEN
 	Iterable<Account> listAccount = anAccountList();
