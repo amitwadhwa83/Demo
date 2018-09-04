@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.transfer.domain.Account;
 import com.transfer.service.AccountService;
 
 /**
@@ -23,7 +22,6 @@ public class TransferUtil {
     private static final String EXPR_AMOUNT = "^\\d+(\\.\\d{1,2})?$";
     private static final String MSG_ACNT_NOT_FOUND = "Account not found";
     private static final String MSG_INVLD_AMNT_VALUE = "Invalid amount value";
-    private static final String MSG_INSUFCINT_BAL = "Insufficient balance in source account";
 
     public static void validateTransfer(AccountService accountService, BigDecimal transferAmount, String... accounts) {
 	// Validate account
@@ -32,15 +30,8 @@ public class TransferUtil {
 		raiseException(MSG_ACNT_NOT_FOUND, account);
 	    }
 	}
-
 	// Validate amount
 	validateAmount(transferAmount);
-
-	// Validate source account balance
-	Account sourceAcct = accountService.findOne(accounts[0]);
-	if (sourceAcct.getBalance().doubleValue() < transferAmount.doubleValue()) {
-	    raiseException(MSG_INSUFCINT_BAL, sourceAcct.getName());
-	}
     }
 
     public static void validateAmount(BigDecimal amount) {

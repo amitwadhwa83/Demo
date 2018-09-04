@@ -1,8 +1,11 @@
 package com.transfer.service;
 
+import static com.transfer.util.TransferUtil.raiseException;
 import static com.transfer.util.TransferUtil.validateTransfer;
 
 import java.math.BigDecimal;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.transaction.Transactional;
 
@@ -32,6 +35,8 @@ public class TransferServiceImpl implements TransferService {
     @Autowired
     private AccountService accountService;
     private static final Transfer EMPTY_TRANSFER = new Transfer();
+    private Lock lock = new ReentrantLock();
+    private static final String MSG_INSUFCINT_BAL = "Insufficient balance in source account";
 
     @Override
     public Transfer findOne(long id) {
@@ -46,19 +51,28 @@ public class TransferServiceImpl implements TransferService {
     @Override
     public long doTransfer(String sourceAccountName, String destAccountName, BigDecimal amount) {
 
-	LOGGER.info("Initiating the transfer for amount {} from account {} to account {}", amount, sourceAccountName,
-		destAccountName);
+	try {
+	    LOGGER.info("Initiating the transfer for amount {} from account {} to account {}", amount,
+		    sourceAccountName, destAccountName);
+	    // Validate values
+	    validateTransfer(accountService, amount, sourceAccountName, destAccountName);
 
-	// Validate values
-	validateTransfer(accountService, amount, sourceAccountName, destAccountName);
+	    lock.lock();
+	    // Validate source account balance
+	    Account sourceAcct = accountService.findOne(sourceAccountName);
+	    if (sourceAcct.getBalance().doubleValue() < amount.doubleValue()) {
+		raiseException(MSG_INSUFCINT_BAL, sourceAcct.getName());
+	    }
 
-	// Do transfer
-	Account source = accountService.findOne(sourceAccountName);
-	Account destination = accountService.findOne(destAccountName);
-	source.setBalance(source.getBalance().subtract(amount));
-	destination.setBalance(destination.getBalance().add(amount));
-
-	// Record transaction
-	return transferRepository.save(new Transfer(sourceAccountName, destAccountName, amount)).getId();
+	    // Do transfer
+	    Account source = accountService.findOne(sourceAccountName);
+	    Account destination = accountService.findOne(destAccountName);
+	    source.setBalance(source.getBalance().subtract(amount));
+	    destination.setBalance(destination.getBalance().add(amount));
+	    // Record transaction
+	    return transferRepository.save(new Transfer(sourceAccountName, destAccountName, amount)).getId();
+	} finally {
+	    lock.unlock();
+	}
     }
 }
