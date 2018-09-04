@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: TransferService
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: pavu
+Implementation-Vendor-Id: com.transfer
+Build-Jdk: 1.8.0_171
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
+ ot-starter-parent/TransferService
+Created-By: Maven Integration for Eclipse
+
